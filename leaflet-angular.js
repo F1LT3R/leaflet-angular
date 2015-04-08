@@ -13,11 +13,7 @@ app.directive('leaflet', [function () { return {
     circles  : '=',
     polygons : '=',
   },
-  // require: 'ngModel',
-  // link: function ($scope, ngModel) {
-  //   console.log(ngModel);
 
-  // },
   controller: ['$scope', function ($scope) {
 
     $scope.initialized = false;
