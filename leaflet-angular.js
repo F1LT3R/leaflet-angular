@@ -1,4 +1,6 @@
-(function(){
+(function(angular){
+
+  'use strict';
 
 var app = angular.module('app.directives.leaflet', []);
 
@@ -153,4 +155,4 @@ app.directive('leaflet', [function () { return {
 }}]);
 
 
-}());
+}(angular));
