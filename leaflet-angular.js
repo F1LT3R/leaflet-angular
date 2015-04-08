@@ -1,131 +1,160 @@
-//   // create a map in the "map" div, set the view to a given place and zoom
-//   var map = L.map('map').setView([51.505, -0.09], 13);
-
-//   // add an OpenStreetMap tile layer
-//   L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png').addTo(map);
-
-//   // add a marker in the given location, attach some popup content to it and open the popup
-//   L.marker([51.5, -0.09]).addTo(map)
-//       .bindPopup('A pretty CSS3 popup. <br> Easily customizable.')
-//       .openPopup();
-
-// }]);
-
-
 (function(){
 
 var app = angular.module('app.directives.leaflet', []);
 
-app.directive('leaflet', [function () {
-  return {
-    restrict: 'E',
-    scope: {
-      view: '=',
-      popups: '=',
-      markers: '=',
-      circles: '=',
-    },
-    controller: ['$scope', function ($scope) {
-      
-      $scope.init = function(){
-        
-        // Initialization
-        $scope.map = L.map($scope.view.id);
+app.directive('leaflet', [function () { return {
 
-        L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png')
+  restrict: 'E',
+
+  scope: {
+    view     : '=',
+    popups   : '=',
+    markers  : '=',
+    circles  : '=',
+    polygons : '=',
+  },
+  // require: 'ngModel',
+  // link: function ($scope, ngModel) {
+  //   console.log(ngModel);
+
+  // },
+  controller: ['$scope', function ($scope) {
+
+    $scope.initialized = false;
+
+    var mapCache = {
+      view: [],
+      markers: [],
+      popups: [],
+      circles: [],
+      polygons: [],
+    };
+
+
+    // Initialization
+    ////////////////////////////////////////////////////////
+
+    $scope.init = function(){
+      $scope.map = L.map($scope.view.id);
+      L.tileLayer(
+        'http://{s}.tile.osm.org/{z}/{x}/{y}.png'
+      ).addTo($scope.map);
+      $scope.initialized = true;
+      $scope.setAll($scope);
+      $scope.setupWatchers();
+    };
+
+    setTimeout($scope.init, 0);
+
+    $scope.setAll = function($_){
+      $_.view     && $_.setView     ($_.view);
+      $_.markers  && $_.addMarkers  ($_.markers);
+      $_.popups   && $_.addPopups   ($_.popups);
+      $_.polygons && $_.addPolygons ($_.polygons);
+      $_.circles  && $_.addCircles  ($_.circles);
+    };
+
+
+    // Leaflet Interface
+    ////////////////////////////////////////////////////////
+
+    $scope.clear = function(thing){
+      var cache = mapCache[thing];
+      cache.length && cache.forEach(function(thing){
+        $scope.map.removeLayer(thing);
+      });
+      mapCache[thing] = [];
+    };
+
+    $scope.setView = function(view){
+      $scope.map.setView([view.lat, view.lng], view.zoom);
+    };
+
+    $scope.addMarkers = function(markers){
+      markers && markers.forEach(function(marker){
+        var M = L.marker([marker.lat, marker.lng]);
+        if (marker.popup)
+          mapCache.markers.push(M.bindPopup(marker.popup));
+        M.addTo($scope.map);
+        if (marker.openPopup) M.openPopup();
+      });
+    };
+
+    $scope.addPopups = function(popups){
+      popups.forEach(function(popup){
+        var P = L.popup();
+        mapCache.popups.push(P);
+        P.setLatLng([popup.lat, popup.lng]);
+        P.setContent(popup.content);
+        if (popup.openPopup) P.openOn($scope.map);
+      });
+    };
+
+    $scope.addPolygons = function(polygons){
+      polygons.forEach(function(polygon){
+        var P = L.polygon( polygon.shape, polygon.style || {})
           .addTo($scope.map);
-        
-        // View
-        $scope.view && $scope.map.setView([
-          $scope.view.lat,
-          $scope.view.lng
-        ], $scope.view.zoom);
+        mapCache.polygons.push(P);
+        if (polygon.popup) {
+          P.bindPopup(polygon.popup.content);
+          if (polygon.popup.openPopup) P.openPopup();
+        }
+      });
+    };
 
-        // Markers
-        $scope.markers && $scope.markers.forEach(function(marker){
-          var LMarker = L.marker([marker.lat, marker.lng]);
-          
-          if (marker.popup)
-            LMarker.bindPopup(marker.popup);
-
-          LMarker.addTo($scope.map);
-
-          if (marker.openPopup)
-            LMarker.openPopup();
-        });
-
-        // Standalone Popups
-        $scope.popups && $scope.popups.forEach(function(popup){
-          var LPopup = L.popup();
-          
-          LPopup.setLatLng([popup.lat, popup.lng]);
-
-          LPopup.setContent(popup.content);
-
-          if (popup.openPopup)
-            LPopup.openOn($scope.map);              
-        });
-
-        // Circles
-        $scope.circles && $scope.circles.forEach(function(circle){
-      
-          var LCircle = L.circle([circle.lat, circle.lng],
-            circle.radius,
-            circle.style).addTo($scope.map);
-        });
-      }
-
-      setTimeout($scope.init, 0);
-    }],
-    template: '<div id="{{view.id}}" style="height:{{view.height}}px;width:{{view.width}}px;"></div>'
-  };
-}]);
+    $scope.addCircles = function(circles){
+      circles.forEach(function(circle){
+        var C = L.circle([circle.lat, circle.lng],
+          circle.radius, circle.style || {})
+          .addTo($scope.map);
+        if (circle.popup) {
+          C.bindPopup(circle.popup.content);
+          if (circle.popup.openPopup) C.openPopup();
+        }
+        mapCache.circles.push(C);
+      });
+    };
 
 
+    // Setup Watchers
+    ////////////////////////////////////////////////////////
 
+    $scope.setupWatchers = function(){
+      $scope.$watch('markers', function(n){
+        $scope.clear('markers');
+        $scope.markers && $scope.addMarkers(n);
+      });
 
+      $scope.$watch('view', function(n, o){
+        var view = angular.extend({}, o, n);
+        $scope.setView(view);
+        return view;
+      });
 
+      $scope.$watch('popups', function(n, o){
+        $scope.clear('popups');
+        $scope.popups && $scope.addPopups(n);
+      });
 
+      $scope.$watch('polygons', function(n, o){
+        $scope.clear('polygons');
+        $scope.polygons && $scope.addPolygons(n);
+      });
 
-// app.constant('config', {
-//   map: {
-//     id: 'map',
-//     height: 400,
-//     center: {
-//       lat: 51.505,
-//       lng: -0.09,
-//       zoom: 13
-//     }
-//   }
-// });
+      $scope.$watch('circles', function(n, o){
+        $scope.clear('circles');
+        $scope.circles && $scope.addCircles(n);
+      });
+    };
 
+  }],
 
-// app.controller('LeafletCtrl', ['$scope', 'config',
+  // Map Template
+  ////////////////////////////////////////////////////////
 
-// function($scope, config) {
-//   angular.extend($scope, config);
-//   console.log(config);
+  template: '<div id="{{view.id}}" style="height:{{view.height}}px;width:{{view.width}}px;"></div>'
 
-//   $scope.init = function(){
-//     $scope.map.leaflet = L.map($scope.map.id);
-//     L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png').addTo($scope.map.leaflet);
-//     $scope.setView();
-//   }
-
-//   setTimeout($scope.init, 0);
-
-//   $scope.setView = function() {
-//     return $scope.map.leaflet.setView([
-//       $scope.map.center.lat,
-//       $scope.map.center.lng
-//     ], $scope.map.center.zoom);
-//   }
-  
-
-//   console.log($scope.map);
-
-// }]);
-
+}}]);
 
 
 }());

@@ -5,10 +5,13 @@
 </head>
 <body ng-app="myMapApp" ng-controller="myMapCtrl">
 
-  <leaflet view="view"
-    markers="markers"
-    popups="popups"
-    circles="circles"></leaflet>
+  <leaflet
+    view     = "view"
+    markers  = "markers"
+    popups   = "popups"
+    circles  = "circles"
+    polygons = "polygons"
+    ></leaflet>
 
 </body>
 </html>
@@ -21,7 +24,19 @@ var ngApp = angular.module('myMapApp', [
   'app.directives.leaflet'
 ]);
 
-ngApp.controller('myMapCtrl', ['$scope', function($scope) {
+ngApp.controller('myMapCtrl', [
+  '$scope', '$timeout',
+function($scope, $timeout) {
+
+  $scope.view = {
+    // Boston
+    lat: 42.36,
+    lng: -71.0589,
+    zoom: 13,
+    height: 500,
+    id: 'map'
+    // width: 500,
+  };
 
   $scope.markers = [
     {
@@ -37,9 +52,39 @@ ngApp.controller('myMapCtrl', ['$scope', function($scope) {
     },
   ];
 
+  // $scope.popups = [
+  //   {
+  //     lat: 42.3401,
+  //     lng: -71.0519,
+  //     content: "I am a standalone popup.",
+  //     openPopup: true,
+  //   }
+  // ];
+
+
+  $scope.polygons = [
+    {
+      shape: [
+        [42.37, -71.07],
+        [42.35, -71.05],
+        [42.36,  -71.10]
+      ],
+      style: {
+        color: 'red',
+        fillColor: '#c00',
+        fillOpacity: 0.25,
+      },
+      popup:{
+        content: "I am a Polygon",
+        // openPopup: true,
+      }
+    }
+  ];
+
+
   $scope.circles = [
     {
-      lat: 42.3601,
+      lat: 42.3301,
       lng: -71.0689,
       radius: 500,
       style: {
@@ -49,34 +94,193 @@ ngApp.controller('myMapCtrl', ['$scope', function($scope) {
       }
     },
     {
-      lat: 42.3601,
+      lat: 42.3401,
       lng: -71.0389,
       radius: 300,
       style: {
         color: 'green',
         fillColor: '#0f3',
         fillOpacity: 0.25
+      },
+      popup:{
+        content: "I am a Circle.",
+        // openPopup: true,
       }
     }
   ];
 
-  // $scope.popups = [
-  //   {
-  //     lat: 42.3601,
-  //     lng: -71.0589,
-  //     content: "I am a standalone popup.",
-  //     openPopup: true,
-  //   }
-  // ];
 
-  $scope.view = {
-    lat: 42.3601,
-    lng: -71.0589,
-    zoom: 13,
-    height: 300,
-    width: 300,
-    id: 'map'
-  };
+  // Updating The Model...
+
+  $timeout(function(){
+    $scope.markers = [
+      {
+        lat: 42.3611,
+        lng: -71.0679,
+        popup: 'Hi!',
+        openPopup: true,
+      }
+    ];
+  }, 1000);
+
+
+  $timeout(function(){
+    $scope.markers = [
+      {
+        lat: 42.3611,
+        lng: -71.0659,
+        popup: 'Again!',
+        openPopup: true,
+      }
+    ];
+  }, 1500);
+
+
+  $timeout(function(){
+    $scope.view = {
+      lat: 42.37,
+      lng: -71.04,
+      zoom:  12
+    };
+  }, 2000);
+
+
+  $timeout(function(){
+    $scope.popups = [
+      {
+        lat: 42.3671,
+        lng: -71.0389,
+        content: "I am a standalone popup!",
+        openPopup: true,
+      }
+    ];
+  }, 2500);
+
+
+  $timeout(function(){
+    $scope.polygons = [
+      {
+        shape: [
+          [42.37, -71.05],
+          [42.35, -71.03],
+          [42.36,  -71.08]
+        ],
+        style: {
+          color: 'green',
+          fillColor: '#0c0',
+          fillOpacity: 0.25,
+        },
+        popup:{ content: "I am a Polygon", }
+      }
+    ];
+  }, 3000);
+
+  $timeout(function(){
+    $scope.polygons = [
+      {
+        shape: [
+          [42.39, -71.07],
+          [42.37, -71.05],
+          [42.38,  -71.10]
+        ],
+        style: {
+          color: 'blue',
+          fillColor: '#00c',
+          fillOpacity: 0.25,
+        },
+        popup:{ content: "I am a Polygon", }
+      }
+    ];
+  }, 3500);
+
+  $timeout(function(){
+    $scope.circles = [
+      {
+        lat: 42.3301,
+        lng: -71.0689,
+        radius: 400,
+        style: {
+          color: 'green',
+          fillColor: '#f03',
+          fillOpacity: 0.5
+        },
+        popup:{
+          content: "Fun!",
+          openPopup: true,
+        }
+      },
+      {
+        lat: 42.3401,
+        lng: -71.0389,
+        radius: 600,
+        style: {
+          color: 'red',
+          fillColor: '#0f3',
+          fillOpacity: 0.25
+        },
+      }
+    ];
+  }, 4000);
+
+
+  $timeout(function(){
+    $scope.circles = [
+      {
+        lat: 42.3301,
+        lng: -71.0689,
+        radius: 700,
+        style: {
+          color: 'blue',
+          fillColor: '#00f',
+          fillOpacity: .25
+        },
+      },
+      {
+        lat: 42.3401,
+        lng: -71.0389,
+        radius: 800,
+        style: {
+          color: 'orange',
+          fillColor: '#aa0',
+          fillOpacity: 0.25
+        },
+        popup:{
+          content: "Funner!",
+          openPopup: true,
+        }
+      }
+    ];
+  }, 4500);
+
+  $timeout(function(){
+    $scope.circles = [
+      {
+        lat: 42.3301,
+        lng: -71.0689,
+        radius: 1300,
+        style: {
+          color: 'red',
+          fillColor: '#f00',
+          fillOpacity: .25
+        },
+        popup:{
+          content: "FUNNEST!!",
+          openPopup: true,
+        }
+      },
+      {
+        lat: 42.3401,
+        lng: -71.0389,
+        radius: 1000,
+        style: {
+          color: 'green',
+          fillColor: '#0f0',
+          fillOpacity: 0.25
+        },
+      }
+    ];
+  }, 5000);
+
 
 }]);
 
