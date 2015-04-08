@@ -24,9 +24,7 @@ var ngApp = angular.module('myMapApp', [
   'app.directives.leaflet'
 ]);
 
-ngApp.controller('myMapCtrl', [
-  '$scope', '$timeout',
-function($scope, $timeout) {
+ngApp.controller('myMapCtrl', [ '$scope', '$timeout', function($scope, $timeout) {
 
   $scope.view = {
     // Boston
