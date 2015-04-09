@@ -66,12 +66,14 @@ app.directive('leaflet', [function () { return {
 
     $scope.setView = function(view){
       $scope.map.setView([view.lat, view.lng], view.zoom);;
-      if (view.fitBounds) $scope.fitBounds($scope.markers);
+      if (view.fitBounds)
+        if ($scope.map)
+          $scope.fitBounds();
     };
 
     $scope.fitBounds = function(markers){
       var padding = $scope.view.padding || 0;
-      $scope.map.fitBounds(markers, {
+      $scope.map.fitBounds($scope.markers, {
           padding: [padding, padding]
         }
       );
