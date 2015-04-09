@@ -75,7 +75,6 @@ app.directive('leaflet', [function () { return {
           padding: [padding, padding]
         }
       );
-      console.log(markers);
     };
 
     $scope.addMarkers = function(markers){
