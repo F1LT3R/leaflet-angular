@@ -65,7 +65,17 @@ app.directive('leaflet', [function () { return {
     };
 
     $scope.setView = function(view){
-      $scope.map.setView([view.lat, view.lng], view.zoom);
+      $scope.map.setView([view.lat, view.lng], view.zoom);;
+      if (view.fitBounds) $scope.fitBounds($scope.markers);
+    };
+
+    $scope.fitBounds = function(markers){
+      var padding = $scope.view.padding || 0;
+      $scope.map.fitBounds(markers, {
+          padding: [padding, padding]
+        }
+      );
+      console.log(markers);
     };
 
     $scope.addMarkers = function(markers){
